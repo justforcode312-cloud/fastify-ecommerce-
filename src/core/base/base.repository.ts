@@ -43,7 +43,9 @@ export abstract class BaseRepository<T> {
     update: UpdateQuery<T>,
     options?: QueryOptions<T>,
   ): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, update, options).lean() as unknown as Promise<T | null>;
+    return this.model
+      .findByIdAndUpdate(id, update, { new: true, ...options })
+      .lean() as unknown as Promise<T | null>;
   }
 
   async updateOne(
@@ -52,7 +54,7 @@ export abstract class BaseRepository<T> {
     options?: QueryOptions<T>,
   ): Promise<T | null> {
     return this.model
-      .findOneAndUpdate(filter, update, options)
+      .findOneAndUpdate(filter, update, { new: true, ...options })
       .lean() as unknown as Promise<T | null>;
   }
 

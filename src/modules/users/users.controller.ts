@@ -1,0 +1,97 @@
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { BaseController } from '@/core/base/base.controller';
+import type { IdDto } from '@/core/dtos/id.dto';
+import { ResponseUtils } from '@/core/utils/response.util';
+import type { ChangePasswordType } from '@/modules/users/dtos/change-password.dto';
+import type { ChangeRoleType } from '@/modules/users/dtos/change-role.dto';
+import type { UpdateProfileType } from '@/modules/users/dtos/update-profile.dto';
+import type { UpdateStatusType } from '@/modules/users/dtos/update-status.dto';
+import type { UsersService } from '@/modules/users/users.service';
+
+export class UsersController extends BaseController {
+  constructor(private readonly userService: UsersService) {
+    super();
+  }
+
+  getProfile = async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = request.user?.id as string;
+
+    const user = await this.userService.findById(userId);
+
+    return ResponseUtils.success(reply, user, 'User fetched successfully');
+  };
+
+  getById = async (
+    request: FastifyRequest<{
+      Params: IdDto;
+    }>,
+    reply: FastifyReply,
+  ) => {
+    const userId = request.params.id;
+
+    const user = await this.userService.findById(userId);
+
+    return ResponseUtils.success(reply, user, 'User fetched successfully');
+  };
+
+  updateProfile = async (
+    request: FastifyRequest<{
+      Body: UpdateProfileType;
+    }>,
+    reply: FastifyReply,
+  ) => {
+    const userId = request.user?.id as string;
+
+    const user = await this.userService.updateProfile(userId, request.body);
+
+    return ResponseUtils.success(reply, user, 'User updated successfully');
+  };
+
+  changePassword = async (
+    request: FastifyRequest<{
+      Body: ChangePasswordType;
+    }>,
+    reply: FastifyReply,
+  ) => {
+    const userId = request.user?.id as string;
+
+    const user = await this.userService.changePassword(userId, request.body);
+
+    return ResponseUtils.success(reply, user, 'Password changed successfully');
+  };
+
+  changeRole = async (
+    request: FastifyRequest<{
+      Params: IdDto;
+      Body: ChangeRoleType;
+    }>,
+    reply: FastifyReply,
+  ) => {
+    const userId = request.params.id;
+
+    const updatedUser = await this.userService.changeRole(userId, request.body);
+
+    return ResponseUtils.success(reply, updatedUser, 'Role updated successfully');
+  };
+
+  changeStatus = async (
+    request: FastifyRequest<{
+      Params: IdDto;
+      Body: UpdateStatusType;
+    }>,
+    reply: FastifyReply,
+  ) => {
+    const userId = request.params.id;
+
+    const updatedUser = await this.userService.changeStatus(userId, request.body);
+
+    return ResponseUtils.success(reply, updatedUser, 'Status updated successfully');
+  };
+
+  deleteUser = async (request: FastifyRequest<{ Params: IdDto }>, reply: FastifyReply) => {
+    const userId = request.params.id;
+    const user = await this.userService.deleteUser(userId);
+    return ResponseUtils.success(reply, user, 'User deleted successfully');
+  };
+}
