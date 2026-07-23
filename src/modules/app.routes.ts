@@ -1,15 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 
+import { refreshTokenRoutes } from '@/modules/refresh-token/refresh-token.routes';
 import { usersRoutes } from '@/modules/users/users.routes';
 
 import healthRoutes from './health/health.routes';
 
 export default async function appRoutes(fastify: FastifyInstance): Promise<void> {
-  // Register all modular routes here
-  await fastify.register(healthRoutes);
+  await fastify.register(healthRoutes, { prefix: '/health' });
   await fastify.register(usersRoutes, { prefix: '/users' });
-
-  // Future modular routes can be added here:
-  // await fastify.register(userRoutes);
-  // await fastify.register(productRoutes);
+  await fastify.register(refreshTokenRoutes, { prefix: '/refresh-tokens' });
 }
