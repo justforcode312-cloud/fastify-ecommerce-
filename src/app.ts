@@ -63,6 +63,12 @@ export async function buildApp(): Promise<FastifyInstance> {
             scheme: 'bearer',
             bearerFormat: 'JWT',
           },
+          cookieAuth: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'access_token',
+            description: 'Access token stored in cookie',
+          },
         },
       },
     },

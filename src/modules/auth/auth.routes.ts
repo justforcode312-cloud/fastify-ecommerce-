@@ -5,6 +5,76 @@ import { LoginDto, type LoginType } from './dtos/login.dto';
 import { RefreshDto, type RefreshType } from './dtos/refresh.dto';
 import { RegisterDto, type RegisterType } from './dtos/register.dto';
 
+const UserSchema = {
+  type: 'object',
+  properties: {
+    _id: { type: 'string', example: '60d0fe4f5311236168a109ca' },
+    firstName: { type: 'string', example: 'John' },
+    lastName: { type: 'string', example: 'Doe' },
+    email: { type: 'string', format: 'email', example: 'john.doe@example.com' },
+    role: { type: 'string', enum: ['ADMIN', 'CUSTOMER'], example: 'CUSTOMER' },
+    status: { type: 'string', enum: ['ACCEPTED', 'REJECTED', 'SUSPENDED'], example: 'ACCEPTED' },
+    isEmailVerified: { type: 'boolean', example: false },
+    lastLoginAt: { type: 'string', format: 'date-time', nullable: true, example: null },
+  },
+};
+
+const AuthResponseSchema = {
+  type: 'object',
+  properties: {
+    success: { type: 'boolean', example: true },
+    statusCode: { type: 'number', example: 200 },
+    message: { type: 'string', example: 'Success' },
+    data: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        user: UserSchema,
+      },
+    },
+  },
+};
+
+const RefreshResponseSchema = {
+  type: 'object',
+  properties: {
+    success: { type: 'boolean', example: true },
+    statusCode: { type: 'number', example: 200 },
+    message: { type: 'string', example: 'Success' },
+    data: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+      },
+    },
+  },
+};
+
+const LogoutResponseSchema = {
+  type: 'object',
+  properties: {
+    success: { type: 'boolean', example: true },
+    statusCode: { type: 'number', example: 200 },
+    message: { type: 'string', example: 'Success' },
+  },
+};
+
+const ErrorResponseSchema = {
+  type: 'object',
+  properties: {
+    statusCode: { type: 'number', example: 400 },
+    error: { type: 'string', example: 'Bad Request' },
+    message: {
+      anyOf: [
+        { type: 'string', example: 'Invalid email or password' },
+        { type: 'array', items: { type: 'string' }, example: ['email: Invalid email address'] },
+      ],
+    },
+  },
+};
+
 export const authRoutes = async (fastify: FastifyInstance) => {
   const { authController } = authContainer;
 
@@ -19,38 +89,34 @@ export const authRoutes = async (fastify: FastifyInstance) => {
           type: 'object',
           required: ['firstName', 'lastName', 'email', 'password'],
           properties: {
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            password: { type: 'string', minLength: 8 },
+            firstName: { type: 'string', description: 'User first name' },
+            lastName: { type: 'string', description: 'User last name' },
+            email: { type: 'string', format: 'email', description: 'User email address' },
+            password: {
+              type: 'string',
+              minLength: 8,
+              description: 'User password (min 8 characters)',
+            },
           },
         },
         response: {
           200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-              data: {
-                type: 'object',
-                properties: {
-                  accessToken: { type: 'string' },
-                  refreshToken: { type: 'string' },
-                  user: {
-                    type: 'object',
-                    properties: {
-                      _id: { type: 'string' },
-                      firstName: { type: 'string' },
-                      lastName: { type: 'string' },
-                      email: { type: 'string' },
-                      role: { type: 'string' },
-                      status: { type: 'string' },
-                      isEmailVerified: { type: 'boolean' },
-                    },
-                  },
-                },
+            description: 'Successful registration',
+            ...AuthResponseSchema,
+            headers: {
+              'Set-Cookie': {
+                schema: { type: 'string' },
+                description: 'Sets access_token and refresh_token cookies',
               },
             },
+          },
+          400: {
+            description: 'Bad Request - Validation failed or email already registered',
+            ...ErrorResponseSchema,
+          },
+          500: {
+            description: 'Internal Server Error',
+            ...ErrorResponseSchema,
           },
         },
       },
@@ -69,36 +135,32 @@ export const authRoutes = async (fastify: FastifyInstance) => {
           type: 'object',
           required: ['email', 'password'],
           properties: {
-            email: { type: 'string', format: 'email' },
-            password: { type: 'string' },
+            email: { type: 'string', format: 'email', description: 'User email address' },
+            password: { type: 'string', description: 'User password' },
           },
         },
         response: {
           200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-              data: {
-                type: 'object',
-                properties: {
-                  accessToken: { type: 'string' },
-                  refreshToken: { type: 'string' },
-                  user: {
-                    type: 'object',
-                    properties: {
-                      _id: { type: 'string' },
-                      firstName: { type: 'string' },
-                      lastName: { type: 'string' },
-                      email: { type: 'string' },
-                      role: { type: 'string' },
-                      status: { type: 'string' },
-                      isEmailVerified: { type: 'boolean' },
-                    },
-                  },
-                },
+            description: 'Successful login',
+            ...AuthResponseSchema,
+            headers: {
+              'Set-Cookie': {
+                schema: { type: 'string' },
+                description: 'Sets access_token and refresh_token cookies',
               },
             },
+          },
+          400: {
+            description: 'Bad Request - Validation failed',
+            ...ErrorResponseSchema,
+          },
+          401: {
+            description: 'Unauthorized - Invalid credentials',
+            ...ErrorResponseSchema,
+          },
+          500: {
+            description: 'Internal Server Error',
+            ...ErrorResponseSchema,
           },
         },
       },
@@ -115,25 +177,35 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         tags: ['Auth'],
         body: {
           type: 'object',
-          required: ['refreshToken'],
           properties: {
-            refreshToken: { type: 'string' },
+            refreshToken: {
+              type: 'string',
+              description: 'Refresh token (optional if provided in cookie)',
+            },
           },
         },
         response: {
           200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
-              data: {
-                type: 'object',
-                properties: {
-                  accessToken: { type: 'string' },
-                  refreshToken: { type: 'string' },
-                },
+            description: 'Successful token refresh',
+            ...RefreshResponseSchema,
+            headers: {
+              'Set-Cookie': {
+                schema: { type: 'string' },
+                description: 'Sets access_token and refresh_token cookies',
               },
             },
+          },
+          400: {
+            description: 'Bad Request - Validation failed',
+            ...ErrorResponseSchema,
+          },
+          401: {
+            description: 'Unauthorized - Invalid or expired refresh token',
+            ...ErrorResponseSchema,
+          },
+          500: {
+            description: 'Internal Server Error',
+            ...ErrorResponseSchema,
           },
         },
       },
@@ -150,16 +222,26 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         body: {
           type: 'object',
           properties: {
-            refreshToken: { type: 'string' },
+            refreshToken: {
+              type: 'string',
+              description: 'Refresh token to revoke (optional if provided in cookie)',
+            },
           },
         },
         response: {
           200: {
-            type: 'object',
-            properties: {
-              success: { type: 'boolean' },
-              message: { type: 'string' },
+            description: 'Successful logout',
+            ...LogoutResponseSchema,
+            headers: {
+              'Set-Cookie': {
+                schema: { type: 'string' },
+                description: 'Clears access_token and refresh_token cookies',
+              },
             },
+          },
+          500: {
+            description: 'Internal Server Error',
+            ...ErrorResponseSchema,
           },
         },
       },
