@@ -7,6 +7,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { env } from '@/core/config/env.config';
 import { registerErrorHandler } from '@/core/error/error-handler.error';
+import auditPlugin from '@/core/plugins/audit.plugin';
 import authPlugin from '@/core/plugins/auth.plugin';
 import dbPlugin from '@/core/plugins/db.plugin';
 import validationPlugin from '@/core/plugins/validation.plugin';
@@ -77,6 +78,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await fastify.register(dbPlugin);
   await fastify.register(authPlugin);
+  await fastify.register(auditPlugin);
   await fastify.register(validationPlugin);
 
   registerErrorHandler(fastify);

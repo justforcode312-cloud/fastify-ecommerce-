@@ -15,3 +15,11 @@ export interface CreateAuditType {
   newValue?: unknown;
   statusCode: number;
 }
+
+export interface AuditContext {
+  module: AuditModules;
+  action: AuditActions;
+  resourceId?: string;
+  oldValue?: unknown;
+  newValue?: unknown;
+}

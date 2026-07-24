@@ -5,10 +5,12 @@ import type { ZodType } from 'zod';
 
 import type { JwtService } from '@/core/services/jwt.service';
 import type { UserPayload } from '@/core/types/auth.type';
+import type { AuditContext } from '@/modules/audit/audit.type';
 
 declare module 'fastify' {
   interface FastifyRequest {
     user?: UserPayload;
+    audit?: AuditContext;
   }
 
   interface FastifyInstance {
