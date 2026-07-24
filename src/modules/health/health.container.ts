@@ -1,4 +1,4 @@
-import { HealthController } from './health.contoller';
+import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 
 class HealthContainer {

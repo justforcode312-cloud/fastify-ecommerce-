@@ -10,10 +10,10 @@ export class HealthController extends BaseController {
     super();
   }
 
-  async check(_request: FastifyRequest, replay: FastifyReply): Promise<void> {
+  check = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const data = await this.healthService.check();
     const statusCode = data.status === 'UP' ? 200 : 503;
 
-    return ResponseUtils.success(replay, data, 'Health check completed successfully', statusCode);
-  }
+    return ResponseUtils.success(reply, data, 'Health check completed successfully', statusCode);
+  };
 }

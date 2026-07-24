@@ -5,6 +5,7 @@ import type {
   QueryFilter,
   QueryOptions,
   UpdateQuery,
+  UpdateWriteOpResult,
 } from 'mongoose';
 
 export abstract class BaseRepository<T> {
@@ -43,7 +44,9 @@ export abstract class BaseRepository<T> {
     update: UpdateQuery<T>,
     options?: QueryOptions<T>,
   ): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, update, options).lean() as unknown as Promise<T | null>;
+    return this.model
+      .findByIdAndUpdate(id, update, { new: true, ...options })
+      .lean() as unknown as Promise<T | null>;
   }
 
   async updateOne(
@@ -52,8 +55,20 @@ export abstract class BaseRepository<T> {
     options?: QueryOptions<T>,
   ): Promise<T | null> {
     return this.model
-      .findOneAndUpdate(filter, update, options)
+      .findOneAndUpdate(filter, update, { new: true, ...options })
       .lean() as unknown as Promise<T | null>;
+  }
+
+  async updateMany(
+    filter: QueryFilter<T>,
+    update: UpdateQuery<T>,
+    options?: QueryOptions<T>,
+  ): Promise<UpdateWriteOpResult> {
+    return this.model.updateMany(
+      filter as Record<string, unknown>,
+      update,
+      options as Record<string, unknown>,
+    );
   }
 
   async deleteById(id: string): Promise<T | null> {
@@ -62,6 +77,16 @@ export abstract class BaseRepository<T> {
 
   async deleteOne(filter: QueryFilter<T>): Promise<T | null> {
     return this.model.findOneAndDelete(filter).lean() as unknown as Promise<T | null>;
+  }
+
+  async deleteMany(
+    filter: QueryFilter<T>,
+    options?: QueryOptions<T>,
+  ): Promise<Record<string, unknown>> {
+    return this.model.deleteMany(
+      filter as Record<string, unknown>,
+      options as Record<string, unknown>,
+    ) as unknown as Promise<Record<string, unknown>>;
   }
 
   async exists(filter: QueryFilter<T>): Promise<boolean> {

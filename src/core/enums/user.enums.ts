@@ -1,0 +1,10 @@
+export enum USER_STATUS {
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum USER_ROLE {
+  ADMIN = 'ADMIN',
+  CUSTOMER = 'CUSTOMER',
+}

@@ -9,6 +9,7 @@ import { env } from '@/core/config/env.config';
 import { registerErrorHandler } from '@/core/error/error-handler.error';
 import authPlugin from '@/core/plugins/auth.plugin';
 import dbPlugin from '@/core/plugins/db.plugin';
+import validationPlugin from '@/core/plugins/validation.plugin';
 import { logger } from '@/core/services/logger.service';
 import appRoutes from '@/modules/app.routes';
 
@@ -54,6 +55,15 @@ export async function buildApp(): Promise<FastifyInstance> {
           description: env.NODE_ENV,
         },
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
   });
 
@@ -67,6 +77,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await fastify.register(dbPlugin);
   await fastify.register(authPlugin);
+  await fastify.register(validationPlugin);
 
   registerErrorHandler(fastify);
 
