@@ -78,4 +78,8 @@ export class UsersService extends BaseService<User> {
       throw new NotFoundException('User not found');
     }
   }
+
+  async createUser(payload: Record<string, unknown>): Promise<User> {
+    return this.userRepository.create(payload);
+  }
 }

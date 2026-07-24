@@ -31,6 +31,7 @@ A production-grade Fastify boilerplate set up with TypeScript 7, strict compiler
 │   │   ├── types/              # Common types (Auth, Response)
 │   │   └── utils/              # Utility helper functions (Response formatting)
 │   ├── modules/
+│   │   ├── auth/               # User authentication module (DTOs, controller, service, routes, container)
 │   │   ├── health/             # Health check module (Container, controller, service, routes)
 │   │   ├── refresh-token/      # Refresh token module (Model, repository, service, routes)
 │   │   ├── users/              # User management module (Model, repository, service, controller, routes)
@@ -95,6 +96,12 @@ All application routes are prefixed with `/api/v1`.
 
 ### Health Check
 - `GET /api/v1/health` - Check application and database health status.
+
+### Auth
+- `POST /api/v1/auth/register` - Register a new user account.
+- `POST /api/v1/auth/login` - Authenticate user and return access & refresh tokens (supports authorization headers and secure cookies).
+- `POST /api/v1/auth/refresh` - Refresh access token using a valid refresh token (supports authorization headers and secure cookies).
+- `POST /api/v1/auth/logout` - Logout user and invalidate active refresh token.
 
 ### Users
 - `GET /api/v1/users/me` - Retrieve authenticated user's profile details.
