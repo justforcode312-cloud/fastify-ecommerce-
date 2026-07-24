@@ -11,8 +11,8 @@ import type {
 export abstract class BaseRepository<T> {
   protected constructor(protected readonly model: Model<T>) {}
 
-  async create(data: Partial<T>): Promise<HydratedDocument<T>> {
-    return this.model.create(data);
+  async create(data: Record<string, unknown>): Promise<HydratedDocument<T>> {
+    return this.model.create(data as unknown as Partial<T>);
   }
 
   async findById(
@@ -98,8 +98,8 @@ export abstract class BaseRepository<T> {
     return this.model.countDocuments(filter);
   }
 
-  async insertMany(data: Partial<T>[]): Promise<T[]> {
-    return this.model.insertMany(data) as unknown as Promise<T[]>;
+  async insertMany(data: Record<string, unknown>[]): Promise<T[]> {
+    return this.model.insertMany(data as unknown as Partial<T>[]) as unknown as Promise<T[]>;
   }
 
   async createOrUpdate(filter: QueryFilter<T>, update: UpdateQuery<T>): Promise<T | null> {
