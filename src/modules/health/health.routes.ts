@@ -5,7 +5,7 @@ import { healthContainer } from './health.container';
 const healthRoutes = async (app: FastifyInstance) => {
   const { healthController } = healthContainer;
   app.get(
-    '/health',
+    '',
     {
       schema: {
         description: 'Get application health status',
