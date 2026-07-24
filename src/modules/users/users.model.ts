@@ -1,9 +1,9 @@
-import mongoose, { type HydratedDocument, type Model, Schema } from 'mongoose';
+import mongoose, { type Document, type HydratedDocument, type Model, Schema } from 'mongoose';
 
 import { baseSchemaOptions } from '@/core/config/schema-options.config';
 import { USER_ROLE, USER_STATUS } from '@/core/enums/user.enums';
 
-export interface User {
+export interface User extends Document {
   firstName: string;
   lastName: string;
   email: string;
@@ -43,4 +43,4 @@ const UsersSchema = new Schema<User>(
 
 export type UserDocument = HydratedDocument<User>;
 
-export const UserModel: Model<User> = mongoose.model<User>('Users', UsersSchema);
+export const UserModel: Model<User> = mongoose.model<User>('Users', UsersSchema, 'users');

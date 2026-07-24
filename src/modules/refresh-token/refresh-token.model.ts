@@ -1,8 +1,15 @@
-import { type HydratedDocument, type Model, model, Schema, type Types } from 'mongoose';
+import {
+  type Document,
+  type HydratedDocument,
+  type Model,
+  model,
+  Schema,
+  type Types,
+} from 'mongoose';
 
 import { baseSchemaOptions } from '@/core/config/schema-options.config';
 
-export interface RefreshToken {
+export interface RefreshToken extends Document {
   user: Types.ObjectId;
   tokenHash: string;
   jti: string;
