@@ -1,6 +1,6 @@
 import { PasswordService } from '@/core/services/password.service';
-import { UserRepository } from '@/modules/users/user.repository';
 import { UsersController } from '@/modules/users/users.controller';
+import { UserRepository } from '@/modules/users/users.repository';
 import { UsersService } from '@/modules/users/users.service';
 
 class UsersContainer {

@@ -6,8 +6,8 @@ import type { ChangeRoleType } from '@/modules/users/dtos/change-role.dto';
 import type { UpdateStatusType } from '@/modules/users/dtos/update-status.dto';
 
 import type { UpdateProfileType } from './dtos/update-profile.dto';
-import type { UserRepository } from './user.repository';
 import type { User } from './users.model';
+import type { UserRepository } from './users.repository';
 
 export class UsersService extends BaseService<User> {
   constructor(
