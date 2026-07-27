@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Types } from 'mongoose';
+import mongoose, { type ClientSession, Types } from 'mongoose';
 
 import { env } from '@/core/config/env.config';
 import { BadRequestException, UnauthorizedException } from '@/core/error/app-error.error';
@@ -53,19 +53,35 @@ export class AuthService {
     }
 
     const hashedPassword = await this.passwordService.hash(data.password);
-    const user = await this.usersService.createUser({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      password: hashedPassword,
-    });
 
-    const tokens = await this.generateTokens(user, metadata);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    const userObj = user.toJSON();
-    delete userObj.password;
+    try {
+      const user = await this.usersService.createUser(
+        {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: hashedPassword,
+        },
+        { session },
+      );
 
-    return { user: userObj, ...tokens };
+      const tokens = await this.generateTokens(user, metadata, { session });
+
+      await session.commitTransaction();
+
+      const userObj = user.toJSON();
+      delete userObj.password;
+
+      return { user: userObj, ...tokens };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 
   async login(data: LoginType, metadata: { ipAddress?: string; userAgent?: string }) {
@@ -146,6 +162,7 @@ export class AuthService {
   private async generateTokens(
     user: { _id: Types.ObjectId | string; email: string; role?: string },
     metadata: { ipAddress?: string; userAgent?: string },
+    options?: { session?: ClientSession },
   ) {
     const jti = crypto.randomUUID();
     const userPayload = {
@@ -161,15 +178,18 @@ export class AuthService {
     const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
     const expiresAt = this.parseExpiry(env.JWT_REFRESH_EXPIRY);
 
-    await this.refreshTokenService.create({
-      user: typeof user._id === 'string' ? new Types.ObjectId(user._id) : user._id,
-      tokenHash,
-      jti,
-      expiresAt,
-      ipAddress: metadata.ipAddress ?? null,
-      userAgent: metadata.userAgent ?? null,
-      device: null,
-    });
+    await this.refreshTokenService.create(
+      {
+        user: typeof user._id === 'string' ? new Types.ObjectId(user._id) : user._id,
+        tokenHash,
+        jti,
+        expiresAt,
+        ipAddress: metadata.ipAddress ?? null,
+        userAgent: metadata.userAgent ?? null,
+        device: null,
+      },
+      options,
+    );
 
     return { accessToken, refreshToken };
   }

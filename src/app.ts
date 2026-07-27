@@ -1,6 +1,7 @@
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -17,6 +18,7 @@ import appRoutes from '@/modules/app.routes';
 export async function buildApp(): Promise<FastifyInstance> {
   const fastify = Fastify({
     loggerInstance: logger,
+    bodyLimit: 1048576, // 1MB payload limit
   });
 
   // Not Found Handler
@@ -40,6 +42,11 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await fastify.register(cookie, {
     secret: env.COOKIE_SECRET,
+  });
+
+  await fastify.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
   });
 
   // 2. Register Swagger / OpenAPI documentation

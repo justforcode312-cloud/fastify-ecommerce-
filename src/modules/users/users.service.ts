@@ -1,3 +1,5 @@
+import type { ClientSession } from 'mongoose';
+
 import { BaseService } from '@/core/base/base.service';
 import { BadRequestException, NotFoundException } from '@/core/error/app-error.error';
 import type { PasswordService } from '@/core/services/password.service';
@@ -6,7 +8,7 @@ import type { ChangeRoleType } from '@/modules/users/dtos/change-role.dto';
 import type { UpdateStatusType } from '@/modules/users/dtos/update-status.dto';
 
 import type { UpdateProfileType } from './dtos/update-profile.dto';
-import type { User } from './users.model';
+import { type User, UserModel } from './users.model';
 import type { UserRepository } from './users.repository';
 
 export class UsersService extends BaseService<User> {
@@ -79,7 +81,14 @@ export class UsersService extends BaseService<User> {
     }
   }
 
-  async createUser(payload: Record<string, unknown>): Promise<User> {
+  async createUser(
+    payload: Record<string, unknown>,
+    options?: { session?: ClientSession },
+  ): Promise<User> {
+    if (options?.session) {
+      const docs = await UserModel.create([payload], { session: options.session });
+      return docs[0] as User;
+    }
     return this.userRepository.create(payload);
   }
 }

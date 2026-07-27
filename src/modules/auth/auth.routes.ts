@@ -82,6 +82,12 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     '/register',
     {
       preValidation: fastify.validate({ body: RegisterDto }),
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         description: 'Register a new user account',
         tags: ['Auth'],
@@ -128,6 +134,12 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     '/login',
     {
       preValidation: fastify.validate({ body: LoginDto }),
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         description: 'Authenticate user and return access & refresh tokens',
         tags: ['Auth'],
@@ -172,6 +184,12 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     '/refresh',
     {
       preValidation: fastify.validate({ body: RefreshDto }),
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
       schema: {
         description: 'Refresh the access token using a valid refresh token',
         tags: ['Auth'],
